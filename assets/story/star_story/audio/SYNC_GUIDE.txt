@@ -1,0 +1,110 @@
+Bedtime Story Sync Guide
+========================
+
+Main file to edit:
+lib/features/child/home/child_sleep_story_screen.dart
+
+Look for:
+_storySyncConfig
+
+Also look for:
+_storyNarrationStartDelayMs
+_storyNarrationEndTrimMs
+_storyFinishGraceMs
+
+Global value
+------------
+
+_storyNarrationStartDelayMs
+- Use this when the audio starts with silence before the real narration.
+- Increase it if the text starts too early.
+- Decrease it if the text starts too late.
+- Example: `1900` means the text waits about 1.9 seconds before syncing.
+
+_storyNarrationEndTrimMs
+- Use this when the audio file has silence after the real narration ends.
+- Increase it if the page transitions or story ending are late near the end.
+- Decrease it if the story finishes too early.
+- Example: `3000` means the app ignores the last 3 seconds of the raw audio file.
+
+_storyFinishGraceMs
+- Extra delay after the effective narration end before the screen closes.
+- Increase it if the story closes before the last spoken word.
+- Decrease it if the story stays open after the voice clearly ended.
+- Example: `550` means the app waits about half a second more before finishing.
+
+Each page has 4 values:
+
+1. pageEndFraction
+- This is where the page should finish within the narrated part of the audio.
+- Example: `0.27` means page 1 ends at 27% of the narration after the start silence.
+- The last page should stay at `1.0`.
+
+2. transitionLeadMs
+- Makes the app move to the next page a bit earlier.
+- Increase it if the page changes too late.
+- Decrease it if the page changes too early.
+
+3. wordLeadMs
+- Makes the highlighted word appear a bit earlier.
+- Increase it if the highlight is behind the narration.
+- Decrease it if the highlight jumps ahead of the voice.
+
+4. manualWordEndRatios
+- Optional.
+- Use this only if you want exact manual word sync for one page.
+- Put the end position of each word as cumulative fractions from `0` to `1`.
+- Example for a 4-word page:
+  `manualWordEndRatios: [0.18, 0.43, 0.71, 1.0]`
+
+Recommended tuning workflow
+---------------------------
+
+1. Start with `wordLeadMs`.
+- Change by small steps such as `20` or `30` milliseconds.
+
+2. If the first highlighted words begin too early or too late:
+- adjust `_storyNarrationStartDelayMs` first.
+
+3. If late timing appears near the end of the story:
+- adjust `_storyNarrationEndTrimMs`.
+
+4. If only the very end closes too early or too late:
+- adjust `_storyFinishGraceMs`.
+
+5. Then adjust `transitionLeadMs`.
+- Change by `20` to `40` milliseconds at a time.
+
+6. If a full page finishes too early or too late:
+- Adjust `pageEndFraction`.
+
+Practical examples
+------------------
+
+- If page 2 starts late:
+  lower page 1 `pageEndFraction` slightly, for example from `0.27` to `0.26`.
+
+- If the first line starts too early by about one second:
+  raise `_storyNarrationStartDelayMs`, for example from `950` to `1100`.
+
+- If the first line starts too early by almost two seconds:
+  raise `_storyNarrationStartDelayMs`, for example from `950` to `1900`.
+
+- If page 4 and the end of the story are late by about 3 seconds:
+  raise `_storyNarrationEndTrimMs`, for example from `0` to `3000`.
+
+- If the last word is still cut off when the story closes:
+  raise `_storyFinishGraceMs`, for example from `550` to `750`.
+
+- If page 3 starts too early:
+  lower page 2 `transitionLeadMs`, for example from `160` to `120`.
+
+- If the highlighted words are one word behind:
+  raise `wordLeadMs`, for example from `300` to `340`.
+
+After any sync edit
+-------------------
+
+1. Save the file.
+2. Run a full app restart, not only Hot Reload.
+3. Test again on Android.
