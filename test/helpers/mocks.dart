@@ -21,8 +21,6 @@ class MockUserCredential extends Mock implements UserCredential {}
 // ── Firestore ────────────────────────────────────────────
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 
-// ملاحظة: تم إزالة Mocks الخاصة بـ Query و CollectionReference لأنها فئات مختومة (sealed).
-// يفضل استخدام fake_cloud_firestore للاختبارات التي تتطلب تفاعل مع قاعدة البيانات.
 
 // ── HTTP ─────────────────────────────────────────────────
 class MockHttpClient extends Mock implements http.Client {}
